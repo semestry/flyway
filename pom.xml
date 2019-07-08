@@ -84,9 +84,9 @@
             <url>${snapshotRepository.url}</url>
         </snapshotRepository>
         <repository>
-            <id>${releaseRepository.id}</id>
-            <name>${releaseRepository.name}</name>
-            <url>${releaseRepository.url}</url>
+            <id>eveoh</id>
+            <name>Eveoh Release Repository</name>
+            <url>https://maven.eveoh.nl/repository/releases</url>
         </repository>
     </distributionManagement>
 
