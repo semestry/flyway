@@ -19,8 +19,6 @@ import org.flywaydb.core.api.MigrationVersion;
 import org.flywaydb.core.api.configuration.Configuration;
 import org.flywaydb.core.api.logging.Log;
 import org.flywaydb.core.api.logging.LogFactory;
-import org.flywaydb.core.internal.callback.CallbackExecutor;
-import org.flywaydb.core.internal.callback.NoopCallbackExecutor;
 import org.flywaydb.core.internal.exception.FlywayDbUpgradeRequiredException;
 import org.flywaydb.core.internal.exception.FlywaySqlException;
 import org.flywaydb.core.internal.jdbc.JdbcTemplate;
@@ -30,16 +28,9 @@ import org.flywaydb.core.internal.placeholder.DefaultPlaceholderReplacer;
 import org.flywaydb.core.internal.placeholder.NoopPlaceholderReplacer;
 import org.flywaydb.core.internal.placeholder.PlaceholderReplacer;
 import org.flywaydb.core.internal.resource.LoadableResource;
-import org.flywaydb.core.internal.resource.NoopResourceProvider;
-import org.flywaydb.core.internal.resource.ResourceProvider;
 import org.flywaydb.core.internal.resource.StringResource;
 import org.flywaydb.core.internal.resource.classpath.ClassPathResource;
-import org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor;
-import org.flywaydb.core.internal.sqlscript.Delimiter;
-import org.flywaydb.core.internal.sqlscript.SqlScript;
-import org.flywaydb.core.internal.sqlscript.SqlScriptExecutor;
-import org.flywaydb.core.internal.sqlscript.SqlStatementBuilderFactory;
-import org.flywaydb.core.internal.util.ExceptionUtils;
+import org.flywaydb.core.internal.sqlscript.*;
 
 import java.io.Closeable;
 import java.nio.charset.Charset;
@@ -159,7 +150,7 @@ public abstract class Database<C extends Connection> implements Closeable {
 
     protected final void ensureDatabaseIsCompatibleWithFlywayEdition(String vendor, String database, String oldestSupportedVersion) {
         if (!version.isAtLeast(oldestSupportedVersion)) {
-            throw new FlywayEnterpriseUpgradeRequiredException(vendor, database, computeVersionDisplayName(version));
+            LOG.warn(new FlywayEnterpriseUpgradeRequiredException(vendor, database, computeVersionDisplayName(version)).getMessage());
         }
     }
 
