@@ -84,9 +84,9 @@
             <url>http://oss.sonatype.org/content/repositories/snapshots</url>
         </snapshotRepository>
         <repository>
-            <id>sonatype-nexus-staging</id>
-            <name>Nexus Release Repository</name>
-            <url>http://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+            <id>eveoh</id>
+            <name>Eveoh Release Repository</name>
+            <url>https://maven.eveoh.nl/repository/releases</url>
         </repository>
 
 
