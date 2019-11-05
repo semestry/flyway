@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2018 Boxfuse GmbH
+ * Copyright 2010-2019 Boxfuse GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,17 +15,17 @@
  */
 package org.flywaydb.core.internal.info;
 
-
 import org.flywaydb.core.api.MigrationInfo;
 import org.flywaydb.core.api.MigrationState;
 import org.flywaydb.core.api.MigrationType;
 import org.flywaydb.core.api.MigrationVersion;
 import org.flywaydb.core.api.resolver.ResolvedMigration;
+import org.flywaydb.core.internal.resolver.ResolvedMigrationImpl;
 import org.flywaydb.core.internal.schemahistory.AppliedMigration;
 import org.flywaydb.core.internal.util.AbbreviationUtils;
-import org.flywaydb.core.internal.util.ObjectUtils;
 
 import java.util.Date;
+import java.util.Objects;
 
 /**
  * Default implementation of MigrationInfo.
@@ -140,6 +140,12 @@ public class MigrationInfoImpl implements MigrationInfo {
 
     @Override
     public MigrationState getState() {
+
+
+
+
+
+
         if (appliedMigration == null) {
             if (resolvedMigration.getVersion() != null) {
                 if (resolvedMigration.getVersion().compareTo(context.baseline) < 0) {
@@ -188,18 +194,13 @@ public class MigrationInfoImpl implements MigrationInfo {
 
         if (appliedMigration.getVersion() == null) {
             if (appliedMigration.getInstalledRank() == context.latestRepeatableRuns.get(appliedMigration.getDescription())) {
-                if (ObjectUtils.nullSafeEquals(appliedMigration.getChecksum(), resolvedMigration.getChecksum())) {
+                if (Objects.equals(appliedMigration.getChecksum(), resolvedMigration.getChecksum())) {
                     return MigrationState.SUCCESS;
                 }
                 return MigrationState.OUTDATED;
             }
             return MigrationState.SUPERSEDED;
         }
-
-
-
-
-
 
         if (outOfOrder) {
             return MigrationState.OUT_OF_ORDER;
@@ -247,6 +248,13 @@ public class MigrationInfoImpl implements MigrationInfo {
     public String validate() {
         MigrationState state = getState();
 
+
+
+
+
+
+
+
         // Ignore any migrations above the current target as they are out of scope.
         if (MigrationState.ABOVE_TARGET.equals(state)) {
             return null;
@@ -260,8 +268,10 @@ public class MigrationInfoImpl implements MigrationInfo {
         }
 
         if ((resolvedMigration == null)
-                && (appliedMigration.getType() != MigrationType.SCHEMA)
-                && (appliedMigration.getType() != MigrationType.BASELINE)
+                && !appliedMigration.getType().isSynthetic()
+
+
+
                 && (appliedMigration.getVersion() != null)
                 && (!context.missing || (MigrationState.MISSING_SUCCESS != state && MigrationState.MISSING_FAILED != state))
                 && (!context.future || (MigrationState.FUTURE_SUCCESS != state && MigrationState.FUTURE_FAILED != state))) {
@@ -279,7 +289,11 @@ public class MigrationInfoImpl implements MigrationInfo {
             return "Detected outdated resolved repeatable migration that should be re-applied to database: " + getDescription();
         }
 
-        if (resolvedMigration != null && appliedMigration != null) {
+        if (resolvedMigration != null && appliedMigration != null
+
+
+
+        ) {
             String migrationIdentifier = appliedMigration.getVersion() == null ?
                     // Repeatable migrations
                     appliedMigration.getScript() :
@@ -290,19 +304,13 @@ public class MigrationInfoImpl implements MigrationInfo {
                     return createMismatchMessage("type", migrationIdentifier,
                             appliedMigration.getType(), resolvedMigration.getType());
                 }
-
-
-
-                    if (resolvedMigration.getVersion() != null
-                            || (context.pending && MigrationState.OUTDATED != state && MigrationState.SUPERSEDED != state)) {
-                        if (!ObjectUtils.nullSafeEquals(resolvedMigration.getChecksum(), appliedMigration.getChecksum())) {
-                            return createMismatchMessage("checksum", migrationIdentifier,
-                                    appliedMigration.getChecksum(), resolvedMigration.getChecksum());
-                        }
+                if (resolvedMigration.getVersion() != null
+                        || (context.pending && MigrationState.OUTDATED != state && MigrationState.SUPERSEDED != state)) {
+                    if (!Objects.equals(resolvedMigration.getChecksum(), appliedMigration.getChecksum())) {
+                        return createMismatchMessage("checksum", migrationIdentifier,
+                                appliedMigration.getChecksum(), resolvedMigration.getChecksum());
                     }
-
-
-
+                }
                 if (!AbbreviationUtils.abbreviateDescription(resolvedMigration.getDescription())
                         .equals(appliedMigration.getDescription())) {
                     return createMismatchMessage("description", migrationIdentifier,
@@ -310,6 +318,14 @@ public class MigrationInfoImpl implements MigrationInfo {
                 }
             }
         }
+
+        // Perform additional validation for pending migrations. This is not performed for previously applied migrations
+        // as it is assumed that if the checksum is unchanged, previous positive validation results still hold true.
+        // #2392: Migrations above target are also ignored as the user explicitly asked for them to not be taken into account.
+        if (!context.pending && MigrationState.PENDING == state && resolvedMigration instanceof ResolvedMigrationImpl) {
+            ((ResolvedMigrationImpl) resolvedMigration).validate();
+        }
+
         return null;
     }
 

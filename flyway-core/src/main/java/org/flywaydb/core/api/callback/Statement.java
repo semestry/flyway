@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2018 Boxfuse GmbH
+ * Copyright 2010-2019 Boxfuse GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,24 +38,4 @@ public interface Statement {
      * {@code null} if the statement hasn't been executed yet.
      */
     List<Error> getErrors();
-
-    /**
-     * Retrieves the current state of error suppression.
-     *
-     * @return {@code true} if errors should be suppressed or {@code false} if they should result in an exception being
-     * thrown.
-     * @deprecated Will be removed in Flyway 6.0. Use Error.isHandled() and Warning.isHandled() instead.
-     */
-    @Deprecated
-    boolean isSuppressErrors();
-
-    /**
-     * Sets the current state of error suppression.
-     *
-     * @param suppressErrors {@code true} if errors should be suppressed or {@code false} if they should result in an
-     *                       exception being thrown.
-     * @deprecated Will be removed in Flyway 6.0. Use Error.setHandled() and Warning.setHandled() instead.
-     */
-    @Deprecated
-    void setSuppressErrors(boolean suppressErrors);
 }
