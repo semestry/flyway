@@ -167,10 +167,10 @@ public abstract class Database<C extends Connection> implements Closeable {
     protected final void ensureDatabaseNotOlderThanOtherwiseRecommendUpgradeToFlywayEdition(String oldestSupportedVersionInThisEdition,
                                                                                             Edition editionWhereStillSupported) {
         if (!getVersion().isAtLeast(oldestSupportedVersionInThisEdition)) {
-            throw new FlywayEditionUpgradeRequiredException(
+            LOG.warn(new FlywayEditionUpgradeRequiredException(
                     editionWhereStillSupported,
                     databaseType,
-                    computeVersionDisplayName(getVersion()));
+                    computeVersionDisplayName(getVersion())).getMessage());
         }
     }
 
